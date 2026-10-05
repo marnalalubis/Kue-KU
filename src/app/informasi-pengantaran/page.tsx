@@ -16,7 +16,7 @@ export default function InfoPengantaranPage() {
           Pengiriman Aman &amp; Terjadwal
         </span>
         <h1 className="font-serif font-black text-3xl sm:text-5xl text-stone-900 tracking-tight">
-          Informasi Pengantaran &amp; Tarif Flat
+          Informasi Pengantaran &amp; Bebas Ongkir
         </h1>
         <p className="text-sm text-stone-600 max-w-xl mx-auto">
           Setiap toples kue dikemas dengan bubble wrap tebal dan box kokoh untuk menjaga keutuhan bentuk kue selama perjalanan.
@@ -29,10 +29,10 @@ export default function InfoPengantaranPage() {
             <Truck className="w-5 h-5" />
           </div>
           <h2 className="font-serif font-bold text-base text-stone-900">
-            Tarif Ongkos Kirim Tetap (Flat Rate)
+            Gratis Biaya Pengantaran (Bebas Ongkir)
           </h2>
           <p className="text-xs text-stone-600 leading-relaxed">
-            Untuk mempermudah perhitungan, kami memberlakukan tarif flat <strong>Rp 20.000 per pesanan</strong> untuk seluruh area jangkauan pengantaran toko tanpa biaya tersembunyi.
+            Untuk mempermudah pemesanan kue Natal Anda, seluruh pengantaran pesanan berlaku <strong>Gratis Ongkir (Rp 0)</strong> tanpa biaya tambahan tersembunyi.
           </p>
         </div>
 

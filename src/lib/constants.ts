@@ -4,8 +4,8 @@ export const DEFAULT_STORE_SETTING: StoreSetting = {
   id: "default-setting",
   storeName: "Kue-KU Artisanal Christmas Bakery",
   phone: "081289001225",
-  flatShippingFee: 20000,
-  deliveryAreaNotes: "Pengantaran khusus area Jabodetabek & sekitarnya via kurir khusus kue (Radius s/d 25km).",
+  flatShippingFee: 0,
+  deliveryAreaNotes: "Pengantaran khusus area Jabodetabek & sekitarnya via kurir khusus kue (Radius s/d 25km). Gratis biaya pengantaran.",
   announcement: "🎄 Pemesanan Spesial Natal 2026 Dibuka! Slot Pengantaran Terbatas untuk Menjaga Kualitas Segar.",
   isStoreOpen: true,
 };

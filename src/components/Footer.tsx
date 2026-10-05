@@ -42,7 +42,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/informasi-pengantaran" className="hover:text-red-400 transition-colors">
-                  Area &amp; Tarif Ongkir Tetap
+                  Area &amp; Informasi Pengantaran
                 </Link>
               </li>
               <li>

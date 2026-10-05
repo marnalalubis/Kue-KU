@@ -121,13 +121,13 @@ export default function AdminSettingsPage() {
         <div className="space-y-4">
           <h2 className="font-serif font-bold text-sm text-stone-900 flex items-center gap-2 border-b border-stone-100 pb-2">
             <Truck className="w-4 h-4 text-red-800" />
-            <span>Tarif Ongkos Kirim Flat</span>
+            <span>Tarif Ongkos Kirim (Rp 0 = Bebas Ongkir)</span>
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-stone-700 uppercase tracking-wider mb-1.5">
-                Tarif Ongkir Tetap (Rupiah):
+                Tarif Ongkir (Rupiah):
               </label>
               <input
                 type="number"
@@ -141,7 +141,7 @@ export default function AdminSettingsPage() {
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-stone-900 font-bold focus:outline-none focus:ring-2 focus:ring-red-700"
               />
               <span className="text-[11px] text-stone-500 mt-1 block">
-                Saat ini: {formatRupiah(settings.flatShippingFee)}
+                Saat ini: {settings.flatShippingFee > 0 ? formatRupiah(settings.flatShippingFee) : "Rp 0 (Gratis Ongkir / Bebas Biaya)"}
               </span>
             </div>
 

@@ -126,9 +126,9 @@ export function CartDrawer() {
           {items.length > 0 && (
             <div className="p-5 border-t border-stone-100 bg-stone-50 space-y-3">
               {/* Delivery notice */}
-              <div className="p-2.5 rounded-xl bg-green-50 border border-green-200 flex items-center gap-2 text-xs text-green-900 font-medium">
+              <div className="p-2.5 rounded-xl bg-green-50 border border-green-200 flex items-center gap-2 text-xs text-green-800 font-medium">
                 <Truck className="w-4 h-4 text-green-700 shrink-0" />
-                <span>Ongkir Flat Rp 20.000 (Otomatis ditambahkan saat checkout)</span>
+                <span>Gratis Pengantaran (Tanpa biaya tambahan ongkir)</span>
               </div>
 
               {/* Subtotal */}

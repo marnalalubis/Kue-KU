@@ -347,9 +347,13 @@ function AdminOrdersContent() {
                     <tfoot className="bg-stone-50 border-t border-stone-200 font-bold">
                       <tr>
                         <td colSpan={3} className="py-2 px-3 text-right">
-                          Ongkos Kirim Flat:
+                          Ongkos Kirim:
                         </td>
-                        <td className="py-2 px-3 text-right">{formatRupiah(activeOrder.shippingFee)}</td>
+                        <td className="py-2 px-3 text-right">
+                          {activeOrder.shippingFee > 0
+                            ? formatRupiah(activeOrder.shippingFee)
+                            : "Gratis (Rp 0)"}
+                        </td>
                       </tr>
                       <tr className="text-red-900 font-black text-sm">
                         <td colSpan={3} className="py-2.5 px-3 text-right">

@@ -221,10 +221,14 @@ export default function OrderSuccessPage() {
                 </tr>
                 <tr>
                   <td colSpan={3} className="py-2.5 px-4 text-right font-medium">
-                    Ongkos Pengantaran Tetap (Flat Rate):
+                    Ongkos Pengantaran:
                   </td>
                   <td className="py-2.5 px-4 text-right font-bold text-stone-900">
-                    {formatRupiah(order.shippingFee)}
+                    {order.shippingFee > 0 ? (
+                      formatRupiah(order.shippingFee)
+                    ) : (
+                      <span className="text-green-700 font-bold">Gratis (Rp 0)</span>
+                    )}
                   </td>
                 </tr>
                 <tr className="bg-red-50 text-red-950 font-black text-sm">

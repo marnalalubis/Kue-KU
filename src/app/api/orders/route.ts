@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     }, 0);
 
     const settings = await getStoreSettings();
-    const shippingFee = settings.flatShippingFee ?? 20000;
+    const shippingFee = settings.flatShippingFee ?? 0;
     const totalAmount = subtotal + shippingFee;
 
     // 4. Generate Order Code

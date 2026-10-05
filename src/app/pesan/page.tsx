@@ -35,8 +35,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const flatShippingFee = 20000;
-  const grandTotal = subtotal + flatShippingFee;
+  const flatShippingFee = 0;
+  const grandTotal = subtotal;
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -319,12 +319,11 @@ export default function CheckoutPage() {
 
             <div className="flex items-center justify-between text-stone-600">
               <span className="flex items-center gap-1">
-                <span>Ongkos Kirim Flat:</span>
-                <span className="text-[10px] text-green-700 bg-green-50 px-1.5 py-0.5 rounded font-bold">
-                  Tarif Tetap
-                </span>
+                <span>Ongkos Kirim:</span>
               </span>
-              <span className="font-bold text-stone-900">{formatRupiah(flatShippingFee)}</span>
+              <span className="font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded text-xs">
+                Gratis (Rp 0)
+              </span>
             </div>
 
             <div className="pt-3 border-t border-stone-200 flex items-center justify-between">
@@ -332,7 +331,7 @@ export default function CheckoutPage() {
                 <span className="block font-serif font-black text-sm text-stone-900">
                   Total Bayar (COD):
                 </span>
-                <span className="text-[10px] text-stone-500">Termasuk pajak &amp; kemasan aman</span>
+                <span className="text-[10px] text-stone-500">Sesuai total belanja produk</span>
               </div>
               <span className="font-black text-2xl text-red-900">
                 {formatRupiah(grandTotal)}
