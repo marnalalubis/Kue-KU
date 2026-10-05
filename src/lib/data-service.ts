@@ -178,6 +178,199 @@ export async function updateProductStock(
   return false;
 }
 
+export interface ProductInputPayload {
+  name: string;
+  description: string;
+  image: string;
+  categoryId: string;
+  isAvailable?: boolean;
+  isFeatured?: boolean;
+  badge?: string | null;
+  allergenInfo?: string | null;
+  variants: {
+    id?: string;
+    name: string;
+    price: number;
+    stock: number;
+    weightGram?: number | null;
+    isAvailable?: boolean;
+  }[];
+}
+
+export async function createProduct(input: ProductInputPayload): Promise<Product> {
+  const baseSlug = input.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+  const slug = `${baseSlug || "kue-natal"}-${Date.now().toString().slice(-4)}`;
+
+  try {
+    const created = await prisma.product.create({
+      data: {
+        name: input.name,
+        slug,
+        description: input.description,
+        image: input.image || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80",
+        categoryId: input.categoryId,
+        badge: input.badge || null,
+        allergenInfo: input.allergenInfo || null,
+        isFeatured: input.isFeatured ?? false,
+        isAvailable: input.isAvailable ?? true,
+        variants: {
+          create: input.variants.map((v) => ({
+            name: v.name,
+            price: Number(v.price) || 0,
+            stock: Number(v.stock) || 50,
+            weightGram: v.weightGram ? Number(v.weightGram) : null,
+            isAvailable: v.isAvailable ?? true,
+          })),
+        },
+      },
+      include: {
+        category: true,
+        variants: true,
+      },
+    });
+    return created as unknown as Product;
+  } catch (err) {
+    console.error("Prisma createProduct error, using fallback:", err);
+  }
+
+  // Fallback
+  const newId = `prod-${Date.now()}`;
+  const fallbackProduct: Product = {
+    id: newId,
+    name: input.name,
+    slug,
+    description: input.description,
+    image: input.image || "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80",
+    categoryId: input.categoryId,
+    isAvailable: input.isAvailable ?? true,
+    isFeatured: input.isFeatured ?? false,
+    badge: input.badge || null,
+    allergenInfo: input.allergenInfo || null,
+    variants: input.variants.map((v, idx) => ({
+      id: `var-${newId}-${idx + 1}`,
+      productId: newId,
+      name: v.name,
+      price: Number(v.price) || 0,
+      stock: Number(v.stock) || 50,
+      weightGram: v.weightGram ? Number(v.weightGram) : null,
+      isAvailable: v.isAvailable ?? true,
+    })),
+  };
+  memoryProducts.unshift(fallbackProduct);
+  return fallbackProduct;
+}
+
+export async function updateProduct(id: string, input: ProductInputPayload): Promise<Product | null> {
+  try {
+    // 1. Update master product info
+    await prisma.product.update({
+      where: { id },
+      data: {
+        name: input.name,
+        description: input.description,
+        image: input.image,
+        categoryId: input.categoryId,
+        badge: input.badge || null,
+        allergenInfo: input.allergenInfo || null,
+        isFeatured: input.isFeatured ?? false,
+        isAvailable: input.isAvailable ?? true,
+      },
+    });
+
+    // 2. Upsert each variant
+    for (const v of input.variants) {
+      if (v.id && !v.id.startsWith("new-")) {
+        await prisma.productVariant.upsert({
+          where: { id: v.id },
+          update: {
+            name: v.name,
+            price: Number(v.price) || 0,
+            stock: Number(v.stock) || 0,
+            weightGram: v.weightGram ? Number(v.weightGram) : null,
+            isAvailable: v.isAvailable ?? true,
+          },
+          create: {
+            id: v.id,
+            productId: id,
+            name: v.name,
+            price: Number(v.price) || 0,
+            stock: Number(v.stock) || 0,
+            weightGram: v.weightGram ? Number(v.weightGram) : null,
+            isAvailable: v.isAvailable ?? true,
+          },
+        });
+      } else {
+        await prisma.productVariant.create({
+          data: {
+            productId: id,
+            name: v.name,
+            price: Number(v.price) || 0,
+            stock: Number(v.stock) || 0,
+            weightGram: v.weightGram ? Number(v.weightGram) : null,
+            isAvailable: v.isAvailable ?? true,
+          },
+        });
+      }
+    }
+
+    const updated = await prisma.product.findUnique({
+      where: { id },
+      include: { category: true, variants: true },
+    });
+    if (updated) return updated as unknown as Product;
+  } catch (err) {
+    console.error("Prisma updateProduct error:", err);
+  }
+
+  // Fallback
+  const idx = memoryProducts.findIndex((p) => p.id === id);
+  if (idx !== -1) {
+    memoryProducts[idx] = {
+      ...memoryProducts[idx],
+      name: input.name,
+      description: input.description,
+      image: input.image,
+      categoryId: input.categoryId,
+      badge: input.badge || null,
+      allergenInfo: input.allergenInfo || null,
+      isFeatured: input.isFeatured ?? false,
+      isAvailable: input.isAvailable ?? true,
+      variants: input.variants.map((v, i) => ({
+        id: v.id && !v.id.startsWith("new-") ? v.id : `var-${id}-${i + 1}`,
+        productId: id,
+        name: v.name,
+        price: Number(v.price) || 0,
+        stock: Number(v.stock) || 0,
+        weightGram: v.weightGram ? Number(v.weightGram) : null,
+        isAvailable: v.isAvailable ?? true,
+      })),
+    };
+    return memoryProducts[idx];
+  }
+  return null;
+}
+
+export async function deleteProduct(id: string): Promise<boolean> {
+  try {
+    await prisma.productVariant.deleteMany({ where: { productId: id } });
+    await prisma.product.delete({ where: { id } });
+    return true;
+  } catch (err) {
+    console.error("Prisma deleteProduct error:", err);
+  }
+
+  const idx = memoryProducts.findIndex((p) => p.id === id);
+  if (idx !== -1) {
+    memoryProducts.splice(idx, 1);
+    return true;
+  }
+  return false;
+}
+
+
 export async function getDailyCapacity(date: string): Promise<DailyCapacity> {
   try {
     const cap = await prisma.dailyCapacity.findUnique({
