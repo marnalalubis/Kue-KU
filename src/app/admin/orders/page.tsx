@@ -53,10 +53,15 @@ function AdminOrdersContent() {
       }
 
       const res = await fetch(url);
+      if (res.status === 401) {
+        window.location.href = `/admin/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+        return;
+      }
       const json = await res.json();
       if (json.success) {
         setOrders(json.data);
       }
+
     } catch (e) {
       console.error("Error fetching orders:", e);
     } finally {

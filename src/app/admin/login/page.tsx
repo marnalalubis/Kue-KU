@@ -29,9 +29,12 @@ export default function AdminLoginPage() {
         setError("Email atau kata sandi admin salah.");
         setLoading(false);
       } else {
-        router.push("/admin");
+        const params = new URLSearchParams(window.location.search);
+        const callbackUrl = params.get("callbackUrl") || "/admin/orders";
+        router.push(callbackUrl);
         router.refresh();
       }
+
     } catch {
       setError("Terjadi kesalahan saat masuk ke sistem.");
       setLoading(false);

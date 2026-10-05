@@ -3,6 +3,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
+// Tangani NEXTAUTH_URL otomatis di platform Vercel
+if (process.env.VERCEL_URL && (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.includes("nama-project"))) {
+  process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_URL}`;
+}
+
 // Hash untuk password default: AdminNatal2026!
 const DEFAULT_ADMIN_HASH = "$2a$10$wT0EmsR/qT.yH0d2iE1s3OcvT3u3E4wN5d4n4W6t4m6u7k8l9o0p1";
 
