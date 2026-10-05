@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum OrderStatus {
+  BARU
+  DIKONFIRMASI
+  DALAM_PROSES
+  DALAM_PENGANTARAN
+  SELESAI
+  DIBATALKAN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  sortOrder   Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id           String           @id @default(cuid())
+  name         String
+  slug         String           @unique
+  description  String
+  image        String
+  categoryId   String
+  category     Category         @relation(fields: [categoryId], references: [id])
+  isAvailable  Boolean          @default(true)
+  isFeatured   Boolean          @default(false)
+  badge        String?
+  allergenInfo String?
+  variants     ProductVariant[]
+  orderItems   OrderItem[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model ProductVariant {
+  id          String      @id @default(cuid())
+  productId   String
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String
+  weightGram  Int?
+  price       Int
+  stock       Int         @default(50)
+  isAvailable Boolean     @default(true)
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderCode       String      @unique
+  customerName    String
+  customerPhone   String
+  deliveryAddress String
+  deliveryDate    String
+  notes           String?
+  subtotal        Int
+  shippingFee     Int         @default(20000)
+  totalAmount     Int
+  status          OrderStatus @default(BARU)
+  paymentMethod   String      @default("COD")
+  paymentStatus   String      @default("PENDING")
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([deliveryDate])
+  @@index([status])
+}
+
+model OrderItem {
+  id          String          @id @default(cuid())
+  orderId     String
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id])
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  productName String
+  variantName String
+  price       Int
+  quantity    Int
+  subtotal    Int
+}
+
+model DailyCapacity {
+  id           String   @id @default(cuid())
+  date         String   @unique
+  maxOrders    Int      @default(30)
+  bookedOrders Int      @default(0)
+  isClosed     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model StoreSetting {
+  id                String   @id @default("default-setting")
+  storeName         String   @default("Kue-KU Artisanal Christmas Bakery")
+  phone             String   @default("081234567890")
+  flatShippingFee   Int      @default(20000)
+  deliveryAreaNotes String   @default("Melayani seluruh area kota (Radius maks 20km)")
+  announcement      String   @default("🎄 Pemesanan Kue Natal 2026 Sudah Dibuka! Slot Pengantaran Terbatas.")
+  isStoreOpen       Boolean  @default(true)
+  updatedAt         DateTime @updatedAt
+}

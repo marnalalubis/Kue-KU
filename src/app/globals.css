@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #991b1b;
+  --color-primary-hover: #7f1d1d;
+  --color-secondary: #166534;
+  --color-accent: #d97706;
+  --color-bg-base: #fafaf9;
+  --color-text-main: #1c1917;
+}
+
+body {
+  color: var(--color-text-main);
+  background-color: var(--color-bg-base);
+  font-family: var(--font-inter, sans-serif);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom festive scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a29e;
+}
