@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Product, Category, ProductVariant } from "@/types";
 import { formatRupiah } from "@/lib/utils";
@@ -19,7 +19,57 @@ import {
   Layers,
   Image as ImageIcon,
   Check,
+  Upload,
+  UploadCloud,
+  FileImage,
+  Link as LinkIcon,
 } from "lucide-react";
+
+// Kompresi foto otomatis di browser (JPG, PNG, WebP) agar ringan & tajam
+function compressImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const maxWidth = 800;
+        const maxHeight = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(event.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        // Konversi ke WebP untuk efisiensi penyimpanan & rendering cepat
+        const compressedDataUrl = canvas.toDataURL("image/webp", 0.85);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+}
+
 
 interface VariantFormState {
   id?: string;
@@ -94,6 +144,41 @@ export default function AdminProductsPage() {
     isFeatured: false,
     variants: [{ ...INITIAL_VARIANT }],
   });
+
+  // Image Upload States
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageMode, setImageMode] = useState<"FILE" | "URL">("FILE");
+  const [processingImage, setProcessingImage] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErrorMessage("Berkas harus berupa gambar yang valid (JPG, JPEG, PNG, WEBP, GIF).");
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      setErrorMessage("Ukuran gambar maksimal 15MB.");
+      return;
+    }
+
+    setProcessingImage(true);
+    setErrorMessage(null);
+
+    try {
+      const compressedDataUrl = await compressImage(file);
+      setFormData((prev) => ({ ...prev, image: compressedDataUrl }));
+      setUploadedFileName(`${file.name} (${Math.round(file.size / 1024)} KB)`);
+    } catch (err) {
+      console.error("Gagal memproses gambar:", err);
+      setErrorMessage("Gagal memproses gambar. Silakan gunakan format JPG atau PNG lainnya.");
+    } finally {
+      setProcessingImage(false);
+    }
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -174,6 +259,8 @@ export default function AdminProductsPage() {
       isFeatured: false,
       variants: [{ ...INITIAL_VARIANT }],
     });
+    setUploadedFileName(null);
+    setImageMode("FILE");
     setErrorMessage(null);
     setIsModalOpen(true);
   };
@@ -198,9 +285,12 @@ export default function AdminProductsPage() {
         isAvailable: v.isAvailable,
       })),
     });
+    setUploadedFileName(null);
+    setImageMode(p.image.startsWith("data:") ? "FILE" : "URL");
     setErrorMessage(null);
     setIsModalOpen(true);
   };
+
 
   // Variant Repeater Helpers
   const handleAddVariantRow = () => {
@@ -627,34 +717,124 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              {/* Image URL & Preview */}
-              <div>
-                <label className="block font-bold text-stone-700 uppercase tracking-wider mb-1">
-                  URL Foto Produk
-                </label>
-                <div className="flex gap-3 items-center">
-                  <div className="relative w-12 h-12 rounded-xl bg-stone-100 overflow-hidden border border-stone-200 shrink-0">
-                    {formData.image ? (
-                      <Image
-                        src={formData.image}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    ) : (
-                      <ImageIcon className="w-5 h-5 text-stone-400 absolute inset-0 m-auto" />
-                    )}
+              {/* Image Upload Section */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block font-bold text-stone-700 uppercase tracking-wider">
+                    Foto Kue Natal *
+                  </label>
+                  
+                  {/* Mode Selector Tabs */}
+                  <div className="flex items-center p-0.5 bg-stone-100 rounded-lg text-[11px] font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setImageMode("FILE")}
+                      className={`px-2.5 py-1 rounded-md transition-all ${
+                        imageMode === "FILE"
+                          ? "bg-white text-stone-900 shadow-xs font-bold"
+                          : "text-stone-500 hover:text-stone-800"
+                      }`}
+                    >
+                      Unggah Berkas (JPG/PNG)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode("URL")}
+                      className={`px-2.5 py-1 rounded-md transition-all ${
+                        imageMode === "URL"
+                          ? "bg-white text-stone-900 shadow-xs font-bold"
+                          : "text-stone-500 hover:text-stone-800"
+                      }`}
+                    >
+                      Gunakan Link URL
+                    </button>
                   </div>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/..."
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-stone-200 text-stone-900 focus:outline-none focus:ring-2 focus:ring-red-700 font-mono text-[11px]"
-                  />
                 </div>
+
+                {imageMode === "FILE" ? (
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
+                      onChange={handleImageFileChange}
+                      className="hidden"
+                    />
+
+                    <div className="flex flex-col sm:flex-row gap-4 items-center p-4 rounded-2xl border-2 border-dashed border-stone-200 hover:border-red-300 bg-stone-50/50 transition-colors">
+                      {/* Image Preview Thumbnail */}
+                      <div className="relative w-24 h-24 rounded-2xl bg-white border border-stone-200 overflow-hidden shrink-0 shadow-xs">
+                        {formData.image ? (
+                          <Image
+                            src={formData.image}
+                            alt="Preview Foto Kue"
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-stone-300">
+                            <ImageIcon className="w-8 h-8" />
+                          </div>
+                        )}
+                        {processingImage && (
+                          <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center">
+                            <Loader2 className="w-5 h-5 text-white animate-spin" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Upload Controls */}
+                      <div className="flex-1 text-center sm:text-left space-y-1.5">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={processingImage}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-stone-100 text-stone-800 font-bold border border-stone-200 text-xs shadow-xs transition-all hover:scale-[1.01]"
+                        >
+                          <Upload className="w-3.5 h-3.5 text-red-800" />
+                          <span>{formData.image ? "Pilih / Ganti Berkas Foto" : "Pilih Foto dari Perangkat"}</span>
+                        </button>
+                        
+                        <p className="text-[11px] text-stone-500 leading-relaxed">
+                          Mendukung format <strong>JPG, JPEG, PNG, WEBP, GIF</strong>. Foto otomatis dikompresi &amp; dioptimasi untuk web toko.
+                        </p>
+
+                        {uploadedFileName && (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>{uploadedFileName}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-3 items-center">
+                    <div className="relative w-12 h-12 rounded-xl bg-stone-100 overflow-hidden border border-stone-200 shrink-0">
+                      {formData.image ? (
+                        <Image
+                          src={formData.image}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <ImageIcon className="w-5 h-5 text-stone-400 absolute inset-0 m-auto" />
+                      )}
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/... atau tautan foto online"
+                      value={formData.image}
+                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      className="flex-1 px-3.5 py-2.5 rounded-xl border border-stone-200 text-stone-900 focus:outline-none focus:ring-2 focus:ring-red-700 font-mono text-[11px]"
+                    />
+                  </div>
+                )}
               </div>
+
 
               {/* Badge & Allergen Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
