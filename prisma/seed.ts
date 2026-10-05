@@ -72,7 +72,61 @@ async function main() {
     },
   });
 
-  // 4. Seed Kapasitas Harian Periode Natal 2026
+  // 4. Seed Produk & Varian
+  const { INITIAL_PRODUCTS } = await import("../src/lib/constants");
+
+  for (const prod of INITIAL_PRODUCTS) {
+    const product = await prisma.product.upsert({
+      where: { slug: prod.slug },
+      update: {
+        name: prod.name,
+        description: prod.description,
+        image: prod.image,
+        categoryId: prod.categoryId,
+        isAvailable: prod.isAvailable,
+        isFeatured: prod.isFeatured,
+        badge: prod.badge,
+        allergenInfo: prod.allergenInfo,
+      },
+      create: {
+        id: prod.id,
+        name: prod.name,
+        slug: prod.slug,
+        description: prod.description,
+        image: prod.image,
+        categoryId: prod.categoryId,
+        isAvailable: prod.isAvailable,
+        isFeatured: prod.isFeatured,
+        badge: prod.badge,
+        allergenInfo: prod.allergenInfo,
+      },
+    });
+
+    for (const v of prod.variants) {
+      await prisma.productVariant.upsert({
+        where: { id: v.id },
+        update: {
+          name: v.name,
+          price: v.price,
+          stock: v.stock,
+          weightGram: v.weightGram,
+          isAvailable: v.isAvailable,
+        },
+        create: {
+          id: v.id,
+          productId: product.id,
+          name: v.name,
+          price: v.price,
+          stock: v.stock,
+          weightGram: v.weightGram,
+          isAvailable: v.isAvailable,
+        },
+      });
+    }
+  }
+  console.log(`Berhasil me-seed ${INITIAL_PRODUCTS.length} produk beserta variannya.`);
+
+  // 5. Seed Kapasitas Harian Periode Natal 2026
   const dates = [
     { date: "2026-12-21", max: 35, booked: 5 },
     { date: "2026-12-22", max: 35, booked: 8 },
@@ -95,6 +149,83 @@ async function main() {
     });
   }
 
+  // 6. Seed Pesanan Contoh Awal (Demo Orders)
+  const existingOrder = await prisma.order.findUnique({
+    where: { orderCode: "KUE-20261224-8821" },
+  });
+
+  if (!existingOrder) {
+    await prisma.order.create({
+      data: {
+        orderCode: "KUE-20261224-8821",
+        customerName: "Ibu Michelle Santoso",
+        customerPhone: "081234567890",
+        deliveryAddress: "Jl. Boulevard Raya Blok PA No. 12, Kelapa Gading, Jakarta Utara",
+        deliveryDate: "2026-12-24",
+        notes: "Mohon diantar sebelum jam 14.00, ada acara ibadah keluarga.",
+        subtotal: 385000,
+        shippingFee: 20000,
+        totalAmount: 405000,
+        status: "DIKONFIRMASI",
+        paymentMethod: "COD",
+        paymentStatus: "PENDING",
+        items: {
+          create: [
+            {
+              productId: "prod-7",
+              variantId: "var-7-1",
+              productName: "Hampers Bethlehem Joy (3 Toples)",
+              variantName: "Paket Box Hardcase + Pita Satin",
+              price: 385000,
+              quantity: 1,
+              subtotal: 385000,
+            },
+          ],
+        },
+      },
+    });
+
+    await prisma.order.create({
+      data: {
+        orderCode: "KUE-20261225-1049",
+        customerName: "Bpk. David Christian",
+        customerPhone: "081987654321",
+        deliveryAddress: "Apartemen Senopati Suites Tower 2 Unit 15A, Kebayoran Baru, Jakarta Selatan",
+        deliveryDate: "2026-12-25",
+        notes: "Titip di resepsionis lobi jika saya belum tiba.",
+        subtotal: 325000,
+        shippingFee: 20000,
+        totalAmount: 345000,
+        status: "BARU",
+        paymentMethod: "COD",
+        paymentStatus: "PENDING",
+        items: {
+          create: [
+            {
+              productId: "prod-1",
+              variantId: "var-1-2",
+              productName: "Nastar Wisman Spesial Natal",
+              variantName: "Toples Bulat Besar 500g",
+              price: 155000,
+              quantity: 1,
+              subtotal: 155000,
+            },
+            {
+              productId: "prod-2",
+              variantId: "var-2-2",
+              productName: "Kastengel Keju Edam Tua & Gouda",
+              variantName: "Toples Bulat Besar 500g",
+              price: 170000,
+              quantity: 1,
+              subtotal: 170000,
+            },
+          ],
+        },
+      },
+    });
+    console.log("Contoh pesanan demo awal berhasil di-seed.");
+  }
+
   console.log("Seeding data selesai dengan sukses!");
 }
 
@@ -106,3 +237,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

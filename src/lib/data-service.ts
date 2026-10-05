@@ -281,7 +281,8 @@ export async function createOrder(orderData: Omit<Order, "id" | "createdAt" | "u
     });
 
     return newOrder as unknown as Order;
-  } catch {
+  } catch (err) {
+    console.error("Prisma createOrder failed, fallback used:", err);
     // Fallback store
     const fullOrder: Order = {
       ...orderData,
@@ -314,8 +315,8 @@ export async function getOrderByCode(code: string): Promise<Order | null> {
       include: { items: true },
     });
     if (order) return order as unknown as Order;
-  } catch {
-    // fallback
+  } catch (err) {
+    console.error("Prisma getOrderByCode failed:", err);
   }
   const found = memoryOrders.find(
     (o) => o.orderCode.toLowerCase() === code.toLowerCase()
@@ -329,13 +330,11 @@ export async function getAllOrders(): Promise<Order[]> {
       include: { items: true },
       orderBy: { createdAt: "desc" },
     });
-    if (orders && orders.length > 0) {
-      return orders as unknown as Order[];
-    }
-  } catch {
-    // fallback
+    return (orders || []) as unknown as Order[];
+  } catch (err) {
+    console.error("Prisma getAllOrders failed, fallback used:", err);
+    return memoryOrders;
   }
-  return memoryOrders;
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order | null> {
