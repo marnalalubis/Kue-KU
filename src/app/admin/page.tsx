@@ -15,8 +15,8 @@ import {
   CheckCircle2,
   Package,
   Boxes,
+  ChefHat,
 } from "lucide-react";
-
 
 export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -60,14 +60,24 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        <Link
-          href="/admin/orders"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-800 hover:bg-red-900 text-white font-bold text-xs shadow-md transition-colors"
-        >
-          <span>Kelola Semua Pesanan</span>
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/admin/recap"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md transition-colors"
+          >
+            <ChefHat className="w-4 h-4" />
+            <span>Rekap Pesanan Dapur</span>
+          </Link>
+          <Link
+            href="/admin/orders"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-800 hover:bg-red-900 text-white font-bold text-xs shadow-md transition-colors"
+          >
+            <span>Kelola Pesanan</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
+
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

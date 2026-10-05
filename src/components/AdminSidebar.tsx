@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   ClipboardList,
+  ChefHat,
   Layers,
   Boxes,
   Settings,
@@ -14,7 +15,6 @@ import {
   ExternalLink,
   Store,
 } from "lucide-react";
-
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -30,6 +30,12 @@ export function AdminSidebar() {
       label: "Pesanan Masuk",
       href: "/admin/orders",
       icon: ClipboardList,
+      exact: false,
+    },
+    {
+      label: "Rekap Pesanan Dapur",
+      href: "/admin/recap",
+      icon: ChefHat,
       exact: false,
     },
     {
