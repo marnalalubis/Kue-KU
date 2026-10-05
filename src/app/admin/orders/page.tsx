@@ -174,7 +174,7 @@ function AdminOrdersContent() {
                 <tr>
                   <th className="py-3.5 px-4">No. Nota</th>
                   <th className="py-3.5 px-4">Pemesan</th>
-                  <th className="py-3.5 px-4">Tgl Kirim</th>
+                  <th className="py-3.5 px-4">Tgl Diantar ke Konsumen</th>
                   <th className="py-3.5 px-4">Item Kue</th>
                   <th className="py-3.5 px-4">Total Bayar</th>
                   <th className="py-3.5 px-4">Status</th>
@@ -290,7 +290,7 @@ function AdminOrdersContent() {
                 <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-1">
                   <div className="font-bold text-stone-900 flex items-center gap-1.5">
                     <Truck className="w-3.5 h-3.5 text-stone-500" />
-                    <span>Jadwal Pengantaran</span>
+                    <span>Tanggal Diantar ke Konsumen</span>
                   </div>
                   <div className="font-bold text-red-900">
                     {formatDateIndo(activeOrder.deliveryDate)}

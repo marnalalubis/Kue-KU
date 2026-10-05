@@ -13,14 +13,23 @@ interface CartContextType {
   subtotal: number;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
+  deliveryDate: string;
+  setDeliveryDate: (date: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+const getDefaultDeliveryDate = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split("T")[0];
+};
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [deliveryDate, setDeliveryDateState] = useState<string>(getDefaultDeliveryDate);
 
   useEffect(() => {
     setIsMounted(true);
@@ -29,10 +38,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (saved) {
         setItems(JSON.parse(saved));
       }
+      const savedDate = localStorage.getItem("kueku_delivery_date");
+      if (savedDate && /^\d{4}-\d{2}-\d{2}$/.test(savedDate)) {
+        setDeliveryDateState(savedDate);
+      }
     } catch (e) {
       console.error("Gagal memuat keranjang belanja dari penyimpanan lokal:", e);
     }
   }, []);
+
+  const setDeliveryDate = (date: string) => {
+    setDeliveryDateState(date);
+    try {
+      localStorage.setItem("kueku_delivery_date", date);
+    } catch (e) {
+      console.error("Gagal menyimpan tanggal pengantaran:", e);
+    }
+  };
 
   useEffect(() => {
     if (isMounted) {
@@ -111,6 +133,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         subtotal,
         isCartOpen,
         setIsCartOpen,
+        deliveryDate,
+        setDeliveryDate,
       }}
     >
       {children}

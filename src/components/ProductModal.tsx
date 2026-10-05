@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Product, ProductVariant } from "@/types";
 import { useCart } from "@/lib/cart-context";
-import { formatRupiah } from "@/lib/utils";
-import { X, Plus, Minus, ShoppingBag, ShieldAlert, Sparkles, Check } from "lucide-react";
+import { formatRupiah, formatDateIndo } from "@/lib/utils";
+import { X, Plus, Minus, ShoppingBag, ShieldAlert, Sparkles, Check, Calendar } from "lucide-react";
 
 interface Props {
   product: Product | null;
@@ -13,10 +13,17 @@ interface Props {
 }
 
 export function ProductModal({ product, onClose }: Props) {
-  const { addItem } = useCart();
+  const { addItem, deliveryDate: globalDeliveryDate, setDeliveryDate } = useCart();
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [localDeliveryDate, setLocalDeliveryDate] = useState(globalDeliveryDate || "");
   const [addedSuccess, setAddedSuccess] = useState(false);
+
+  useEffect(() => {
+    if (globalDeliveryDate) {
+      setLocalDeliveryDate(globalDeliveryDate);
+    }
+  }, [globalDeliveryDate]);
 
   useEffect(() => {
     if (product && product.variants.length > 0) {
@@ -32,6 +39,10 @@ export function ProductModal({ product, onClose }: Props) {
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
+
+    if (localDeliveryDate) {
+      setDeliveryDate(localDeliveryDate);
+    }
 
     addItem({
       productId: product.id,
@@ -170,6 +181,37 @@ export function ProductModal({ product, onClose }: Props) {
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+
+            {/* Tanggal Pesan Diantar ke Konsumen */}
+            <div className="mt-5 p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-red-800 shrink-0" />
+                  <span>Tanggal Pesan Diantar ke Konsumen:</span>
+                </label>
+                <span className="text-[10px] text-emerald-800 bg-emerald-100 font-bold px-2 py-0.5 rounded-full">
+                  Pilih Tanggal
+                </span>
+              </div>
+
+              <input
+                type="date"
+                min={new Date().toISOString().split("T")[0]}
+                value={localDeliveryDate}
+                onChange={(e) => {
+                  setLocalDeliveryDate(e.target.value);
+                  if (e.target.value) setDeliveryDate(e.target.value);
+                }}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-stone-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-red-700 bg-white shadow-xs"
+              />
+
+              {localDeliveryDate && (
+                <div className="text-[11px] text-stone-600 flex items-center justify-between pt-1">
+                  <span>Rencana Pengantaran:</span>
+                  <span className="font-extrabold text-red-900">{formatDateIndo(localDeliveryDate)}</span>
+                </div>
+              )}
             </div>
           </div>
 

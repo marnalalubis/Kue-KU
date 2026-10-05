@@ -88,7 +88,7 @@ export default function OrderSuccessPage() {
   }
 
   const whatsappMessage = encodeURIComponent(
-    `Halo Admin Kue-KU, saya ingin mengonfirmasi pesanan saya dengan nomor: ${order.orderCode} atas nama ${order.customerName}. Mohon info proses selanjutnya ya.`
+    `Halo Admin Kue-KU, saya ingin konfirmasi pesanan dengan nomor: ${order.orderCode} atas nama ${order.customerName}. Tanggal Pesan Diantar ke Konsumen: ${formatDateIndo(order.deliveryDate)}. Mohon info proses selanjutnya ya.`
   );
 
   return (
@@ -144,10 +144,10 @@ export default function OrderSuccessPage() {
           <div className="p-4 rounded-2xl bg-stone-50 border border-stone-100 space-y-2">
             <div className="font-bold text-stone-900 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
               <Calendar className="w-3.5 h-3.5 text-stone-500" />
-              <span>Jadwal Pengantaran Dapur</span>
+              <span>Tanggal Pesan Diantar ke Konsumen</span>
             </div>
             <div>
-              <span className="text-stone-500 block">Tanggal Pengiriman:</span>
+              <span className="text-stone-500 block">Jadwal Pengantaran:</span>
               <strong className="text-red-900 text-sm font-extrabold">
                 {formatDateIndo(order.deliveryDate)}
               </strong>

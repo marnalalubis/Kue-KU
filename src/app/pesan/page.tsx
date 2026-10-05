@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { DateCapacityPicker } from "@/components/DateCapacityPicker";
-import { formatRupiah } from "@/lib/utils";
+import { formatRupiah, formatDateIndo } from "@/lib/utils";
 import {
   ShoppingBag,
   Truck,
@@ -19,17 +19,18 @@ import {
   Loader2,
   CheckCircle2,
   ArrowLeft,
+  Calendar,
 } from "lucide-react";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, deliveryDate: cartDeliveryDate, setDeliveryDate: setCartDeliveryDate } = useCart();
 
   // Form State
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [deliveryDate, setDeliveryDate] = useState("2026-12-24");
+  const [deliveryDate, setDeliveryDate] = useState(cartDeliveryDate || "");
   const [notes, setNotes] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -240,16 +241,19 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Section 2: Delivery Date with Capacity Engine */}
+          {/* Section 2: Delivery Date */}
           <div className="bg-white p-6 sm:p-7 rounded-3xl border border-stone-200 shadow-sm space-y-4">
             <h2 className="font-serif font-bold text-lg text-stone-900 flex items-center gap-2 border-b border-stone-100 pb-3">
-              <Truck className="w-5 h-5 text-red-800" />
-              <span>2. Jadwal &amp; Kuota Pengantaran</span>
+              <Calendar className="w-5 h-5 text-red-800" />
+              <span>2. Tanggal Pesan Diantar ke Konsumen</span>
             </h2>
 
             <DateCapacityPicker
               selectedDate={deliveryDate}
-              onSelectDate={(d) => setDeliveryDate(d)}
+              onSelectDate={(d) => {
+                setDeliveryDate(d);
+                setCartDeliveryDate(d);
+              }}
             />
           </div>
 
@@ -325,6 +329,18 @@ export default function CheckoutPage() {
                 Gratis (Rp 0)
               </span>
             </div>
+
+            {deliveryDate && (
+              <div className="flex items-center justify-between text-stone-600 bg-amber-50/80 p-2.5 rounded-xl border border-amber-200/70">
+                <span className="flex items-center gap-1.5 font-bold text-stone-700">
+                  <Calendar className="w-3.5 h-3.5 text-red-800" />
+                  <span>Diantar ke Konsumen:</span>
+                </span>
+                <span className="font-black text-red-950 text-right text-xs">
+                  {formatDateIndo(deliveryDate)}
+                </span>
+              </div>
+            )}
 
             <div className="pt-3 border-t border-stone-200 flex items-center justify-between">
               <div>

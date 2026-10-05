@@ -4,8 +4,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
-import { formatRupiah } from "@/lib/utils";
-import { X, Plus, Minus, Trash2, ArrowRight, ShoppingBag, Truck } from "lucide-react";
+import { formatRupiah, formatDateIndo } from "@/lib/utils";
+import { X, Plus, Minus, Trash2, ArrowRight, ShoppingBag, Truck, Calendar } from "lucide-react";
 
 export function CartDrawer() {
   const {
@@ -16,6 +16,7 @@ export function CartDrawer() {
     itemCount,
     isCartOpen,
     setIsCartOpen,
+    deliveryDate,
   } = useCart();
 
   if (!isCartOpen) return null;
@@ -130,6 +131,17 @@ export function CartDrawer() {
                 <Truck className="w-4 h-4 text-green-700 shrink-0" />
                 <span>Gratis Pengantaran (Tanpa biaya tambahan ongkir)</span>
               </div>
+
+              {/* Delivery Date Notice */}
+              {deliveryDate && (
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs text-amber-950 font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-amber-800 shrink-0" />
+                    <span className="text-[11px] text-stone-600">Diantar ke Konsumen:</span>
+                  </div>
+                  <strong className="text-red-900 font-bold text-xs">{formatDateIndo(deliveryDate)}</strong>
+                </div>
+              )}
 
               {/* Subtotal */}
               <div className="flex items-center justify-between text-sm">
