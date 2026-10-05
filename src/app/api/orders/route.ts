@@ -51,19 +51,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Validasi Kapasitas Harian Toko
-    const capacity = await getDailyCapacity(deliveryDate);
-    if (capacity.isClosed || capacity.bookedOrders >= capacity.maxOrders) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Mohon maaf, kuota pesanan untuk tanggal ${deliveryDate} sudah penuh (${capacity.bookedOrders}/${capacity.maxOrders} slot). Silakan pilih tanggal pengantaran lainnya.`,
-        },
-        { status: 400 }
-      );
-    }
+    // 2. Perhitungan Subtotal & Ongkir
 
-    // 3. Perhitungan Subtotal & Ongkir
     const subtotal = items.reduce((sum: number, item: CartItem) => {
       const itemPrice = Number(item.price) || 0;
       const itemQty = Number(item.quantity) || 1;

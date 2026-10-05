@@ -8,12 +8,13 @@ import {
   LayoutDashboard,
   ClipboardList,
   Layers,
-  Calendar,
+  Boxes,
   Settings,
   LogOut,
   ExternalLink,
   Store,
 } from "lucide-react";
+
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -32,15 +33,15 @@ export function AdminSidebar() {
       exact: false,
     },
     {
-      label: "Katalog & Stok Kue",
+      label: "Katalog Kue",
       href: "/admin/products",
       icon: Layers,
       exact: false,
     },
     {
-      label: "Batas Kuota Harian",
-      href: "/admin/capacity",
-      icon: Calendar,
+      label: "Entry Stok Kue",
+      href: "/admin/stock",
+      icon: Boxes,
       exact: false,
     },
     {

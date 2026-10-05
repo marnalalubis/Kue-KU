@@ -14,7 +14,9 @@ import {
   Clock,
   CheckCircle2,
   Package,
+  Boxes,
 } from "lucide-react";
+
 
 export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -123,23 +125,27 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Card 4: Kuota Pengantaran */}
-        <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-between">
+        {/* Card 4: Persediaan Stok Toko */}
+        <Link
+          href="/admin/stock"
+          className="p-5 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-between hover:border-red-300 transition-colors group"
+        >
           <div>
             <span className="text-xs font-bold text-stone-500 uppercase tracking-wider block">
-              Batas Kuota Harian
+              Entry Stok Kue
             </span>
-            <span className="font-serif font-black text-2xl sm:text-3xl text-blue-700 mt-1 block">
-              35 Slot
+            <span className="font-serif font-black text-xl sm:text-2xl text-stone-900 mt-1 block group-hover:text-red-800">
+              Kelola Stok &rarr;
             </span>
             <span className="text-[11px] text-stone-400 mt-0.5 block">
-              Batas panggang per hari
+              Catat panggangan baru
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center">
-            <Calendar className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center">
+            <Boxes className="w-6 h-6" />
           </div>
-        </div>
+        </Link>
+
       </div>
 
       {/* Recent Orders Section */}
